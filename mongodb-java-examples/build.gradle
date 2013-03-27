@@ -1,0 +1,17 @@
+apply plugin: 'eclipse'
+apply plugin: 'java'
+
+sourceCompatibility = 1.6
+version '0.0.01'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	
+	compile 'org.mongodb:mongo-java-driver:2.10.1'
+	compile 'commons-lang:commons-lang:2.6'
+	
+	testCompile 'junit:junit:4.11'
+}
