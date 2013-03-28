@@ -23,6 +23,7 @@ package com.examples.aggregation;
 
 import java.util.Iterator;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -157,18 +158,18 @@ public class AggregationExample {
 		BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
 		builder.push("$project");
 		builder.add("_id", 0);
-		
+
 		builder.push("maker");
 		builder.add("$toLower", "$manufacturer");
 		builder.pop();
-		
+
 		builder.push("details");
 		builder.add("category", "$category");
 		builder.push("price");
 		builder.add("$multiply", new Object[] { "$price", 10 });
 		builder.pop();
 		builder.pop();
-		
+
 		builder.add("item", "$name");
 		builder.pop();
 
@@ -176,4 +177,83 @@ public class AggregationExample {
 
 	}
 
+	public Iterator<DBObject> match() {
+		BasicDBObjectBuilder match = buildMatchDBObject();
+		BasicDBObjectBuilder group = new BasicDBObjectBuilder();
+		group.push("$group");
+		group.add("_id", "$city");
+		group.push("population");
+		group.add("$sum", "$pop");
+		group.pop();
+		group.push("zip_codes");
+		group.add("$addToSet", "$_id");
+		group.pop();
+		group.pop();
+		return col.aggregate(match.get(), group.get()).results().iterator();
+
+	}
+
+	public Iterator<DBObject> sort() {
+		BasicDBObjectBuilder match = buildMatchDBObject();
+
+		BasicDBObjectBuilder group = new BasicDBObjectBuilder();
+		group.push("$group");
+		group.add("_id", "$city");
+		group.push("population");
+		group.add("$sum", "$pop");
+		group.pop();
+		group.pop();
+
+		BasicDBObjectBuilder project = new BasicDBObjectBuilder();
+		project.push("$project");
+		project.add("_id", 0);
+		project.add("city", "$_id");
+		project.add("population", 1);
+		project.pop();
+
+		BasicDBObjectBuilder sort = new BasicDBObjectBuilder();
+		sort.push("$sort");
+		sort.add("population", -1);
+		sort.pop();
+
+		return col.aggregate(match.get(), group.get(), project.get(), sort.get()).results().iterator();
+
+	}
+
+	public Iterator<DBObject> limitAndSkip() {
+		BasicDBObjectBuilder match = buildMatchDBObject();
+
+		BasicDBObjectBuilder group = new BasicDBObjectBuilder();
+		group.push("$group");
+		group.add("_id", "$city");
+		group.push("population");
+		group.add("$sum", "$pop");
+		group.pop();
+		group.pop();
+
+		BasicDBObjectBuilder project = new BasicDBObjectBuilder();
+		project.push("$project");
+		project.add("_id", 0);
+		project.add("city", "$_id");
+		project.add("population", 1);
+		project.pop();
+
+		BasicDBObjectBuilder sort = new BasicDBObjectBuilder();
+		sort.push("$sort");
+		sort.add("population", -1);
+		sort.pop();
+		
+		BasicDBObject skip = new BasicDBObject("$skip",10);
+		BasicDBObject limit = new BasicDBObject("$limit",5);
+		
+		return col.aggregate(match.get(), group.get(), project.get(), sort.get(), skip, limit).results().iterator();
+	}
+
+	private BasicDBObjectBuilder buildMatchDBObject() {
+		BasicDBObjectBuilder match = new BasicDBObjectBuilder();
+		match.push("$match");
+		match.add("state", "NY");
+		match.pop();
+		return match;
+	}
 }

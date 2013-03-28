@@ -214,6 +214,37 @@ public class AggregationExampleTest {
 		}
 		collection.drop();
 	}
+	
+	@Test
+	public void matchTest() {
+		// this test assumes that you have imported the zips.jason file provided in the M101J course from 10Gen, week 5 homework
+		DBCollection zipsCollection = client.getDB("states").getCollection("zips");
+		agg.setCollection(zipsCollection);
+		Iterator<DBObject> iter = agg.match();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+	}
+	
+	@Test
+	public void sortTest() {
+		DBCollection zipsCollection = client.getDB("states").getCollection("zips");
+		agg.setCollection(zipsCollection);
+		Iterator<DBObject> iter = agg.sort();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+	}
+	
+	@Test
+	public void limitAndSkipTest() {
+		DBCollection zipsCollection = client.getDB("states").getCollection("zips");
+		agg.setCollection(zipsCollection);
+		Iterator<DBObject> iter = agg.limitAndSkip();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+	}
 
 	private List<Double> generateRandomDoubleValues() {
 		List<Double> prices = new ArrayList<Double>();
