@@ -31,14 +31,14 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 public class AggregationExample {
-	
+	private DBCollection	col;
+
+	public void setCollection(DBCollection col) {
+		this.col = col;
+	}
+
 	public Iterator<DBObject> simpleAggregation() throws UnknownHostException {
-		DBCollection collection = getMongoClient();
-		
-//      This can also be done with BasicDBObject 		
-//		BasicDBObject groupFields = new BasicDBObject("_id","$manufacturer").append("num_products", new BasicDBObject("$sum", 1));
-//		return  collection.aggregate(new BasicDBObject("$group", groupFields)).results().iterator();
-		
+
 		BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
 		builder.push("$group");
 		builder.add("_id", "$manufacturer");
@@ -46,15 +46,8 @@ public class AggregationExample {
 		builder.add("$sum", 1);
 		builder.pop();
 		builder.pop();
-		
-		return  collection.aggregate(builder.get()).results().iterator();
-	}
 
-	private DBCollection getMongoClient() throws UnknownHostException {
-		MongoClient client = new MongoClient("localhost:27017");
-		DB db = client.getDB("agg");
-		DBCollection collection = db.getCollection("products");
-		return collection;
+		return col.aggregate(builder.get()).results().iterator();
 	}
 
 }

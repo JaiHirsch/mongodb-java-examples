@@ -1,3 +1,7 @@
+/*
+ * This is not actually intended to be a unit test, but a simple way to display the behavior of aggregation
+ */
+
 package com.examples.aggregation;
 
 import java.net.UnknownHostException;
@@ -6,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.mongodb.BasicDBObject;
@@ -15,8 +21,28 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 public class AggregationExampleTest {
+	private static AggregationExample	agg;
+	private static MongoClient	client;
+	private static DBCollection	collection;
+	
+	@BeforeClass
+	public static void setUpMongo() {
+		try {
+			client = new MongoClient("localhost:27017");
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		DB db = client.getDB("agg");
+		collection = db.getCollection("products");
+		agg	= new AggregationExample();
+		agg.setCollection(collection);
+	}
+	
+	@AfterClass
+	public static void closeMongo() {
+		client.close();
+	}
 
-	AggregationExample	agg	= new AggregationExample();
 
 	@Test
 	public void test() throws UnknownHostException {
@@ -39,11 +65,12 @@ public class AggregationExampleTest {
 
 		Iterator<DBObject> iter = agg.simpleAggregation();
 		while(iter.hasNext()) {
-			String[] array = iter.next().keySet().toArray(new String[] {});
-			System.out.println(array[1]);
+			System.out.println(iter.next());
 		}
-
 		collection.drop();
+		client.close();
 	}
+	
+	
 
 }
