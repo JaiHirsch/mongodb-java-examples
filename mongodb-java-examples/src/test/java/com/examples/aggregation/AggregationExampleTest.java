@@ -25,6 +25,7 @@ public class AggregationExampleTest {
 	private static AggregationExample	agg;
 	private static MongoClient	client;
 	private static DBCollection	collection;
+	private static DB	db;
 	
 	@BeforeClass
 	public static void setUpMongo() {
@@ -33,7 +34,7 @@ public class AggregationExampleTest {
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-		DB db = client.getDB("agg");
+		db = client.getDB("agg");
 		collection = db.getCollection("products");
 		agg	= new AggregationExample();
 		agg.setCollection(collection);
@@ -125,7 +126,85 @@ public class AggregationExampleTest {
 		collection.drop();
 		
 	}
+	
+	@Test
+	public void addToSetTest() {
+		List<String> manufacturers = generateRandomAlphaNumericValues();
+		List<String> categories = generateRandomAlphaNumericValues();
+		
+		for (int i = 0; i < 100; i++) {
+			if (i < 50)
+				collection.insert(new BasicDBObject("manufacturer", manufacturers.get(0)).append("category", categories.get(RandomUtils.nextInt(categories.size()))));
+			else if(i < 75 ) collection.insert(new BasicDBObject("manufacturer", manufacturers.get(1)).append("category", categories.get(RandomUtils.nextInt(categories.size()))));
+			else if(i < 95 ) collection.insert(new BasicDBObject("manufacturer", manufacturers.get(2)).append("category", categories.get(RandomUtils.nextInt(categories.size()))));
+			else collection.insert(new BasicDBObject("manufacturer", manufacturers.get(3)).append("category", categories.get(RandomUtils.nextInt(categories.size()))));
+		}
+		
+		Iterator<DBObject> iter = agg.addToSet();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+		collection.drop();
+	}
+	
+	@Test
+	public void pushTest() {
+		List<String> manufacturers = generateRandomAlphaNumericValues();
+		List<String> categories = generateRandomAlphaNumericValues();
+		
+		for (int i = 0; i < 100; i++) {
+			if (i < 50)
+				collection.insert(new BasicDBObject("manufacturer", manufacturers.get(0)).append("category", categories.get(RandomUtils.nextInt(categories.size()))));
+			else if(i < 75 ) collection.insert(new BasicDBObject("manufacturer", manufacturers.get(1)).append("category", categories.get(RandomUtils.nextInt(categories.size()))));
+			else if(i < 95 ) collection.insert(new BasicDBObject("manufacturer", manufacturers.get(2)).append("category", categories.get(RandomUtils.nextInt(categories.size()))));
+			else collection.insert(new BasicDBObject("manufacturer", manufacturers.get(3)).append("category", categories.get(RandomUtils.nextInt(categories.size()))));
+		}
+		
+		Iterator<DBObject> iter = agg.push();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+		collection.drop();
+	}
 
+	@Test
+	public void maxAndMinTest() {
+		List<String> manufacturers = generateRandomAlphaNumericValues();
+		List<Double> prices = generateRandomDoubleValues();
+		
+		for (int i = 0; i < 100; i++) {
+			if (i < 50)
+				collection.insert(new BasicDBObject("manufacturer", manufacturers.get(0)).append("price", prices.get(RandomUtils.nextInt(prices.size()))));
+			else if(i < 75 ) collection.insert(new BasicDBObject("manufacturer", manufacturers.get(1)).append("price", prices.get(RandomUtils.nextInt(prices.size()))));
+			else if(i < 95 ) collection.insert(new BasicDBObject("manufacturer", manufacturers.get(2)).append("price", prices.get(RandomUtils.nextInt(prices.size()))));
+			else collection.insert(new BasicDBObject("manufacturer", manufacturers.get(3)).append("price", prices.get(RandomUtils.nextInt(prices.size()))));
+		}
+		
+		Iterator<DBObject> iter = agg.maxPrice();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+		collection.drop();
+	}
+	
+	@Test
+	public void doubleGroupStages() {
+		DBCollection grades = db.getCollection("grades");
+		agg.setCollection(grades);
+		int[] class_id = {1,2,3,4,5};
+		int[] student_id = {100,101,102,103,104,105};
+		for(int cls = 0; cls < class_id.length; cls++) {
+			for(int student = 0; student < student_id.length; student++) {
+				grades.insert(new BasicDBObject("class_id", class_id[cls]).append("student_id", student_id[student] ).append("score", RandomUtils.nextInt(100)));
+			}
+		}
+		Iterator<DBObject> iter = agg.doubleGroupStages();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+		grades.drop();
+		collection.drop();
+	}
 
 	private List<Double> generateRandomDoubleValues() {
 		List<Double> prices = new ArrayList<Double>();
