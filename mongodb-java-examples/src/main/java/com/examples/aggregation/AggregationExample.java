@@ -256,4 +256,54 @@ public class AggregationExample {
 		match.pop();
 		return match;
 	}
+	
+	public Iterator<DBObject> unwind() {
+		
+		BasicDBObject unwind = new BasicDBObject("$unwind","$tags");
+		
+		BasicDBObjectBuilder group = new BasicDBObjectBuilder();
+		group.push("$group");
+		group.add("_id", "$tags");
+		group.push("count");
+		group.add("$sum", 1);
+		group.pop();
+		group.pop();
+		
+		BasicDBObjectBuilder sort = new BasicDBObjectBuilder();
+		sort.push("$sort");
+		sort.add("count", -1);
+		sort.pop();
+		
+		BasicDBObject limit = new BasicDBObject("$limit", 10);
+		
+		BasicDBObjectBuilder project = new BasicDBObjectBuilder();
+		project.push("$project");
+		project.add("_id", 0);
+		project.add("tag", "$_id");
+		project.add("count", 1);
+		
+		
+		return col.aggregate(unwind, group.get(), sort.get(), limit, project.get() ).results().iterator();
+	}
+	
+public Iterator<DBObject> doubleUnwind() {
+		
+		BasicDBObject unwindSizes = new BasicDBObject("$unwind","$sizes");
+		BasicDBObject unwindColors = new BasicDBObject("$unwind","$colors");
+		
+		BasicDBObjectBuilder group = new BasicDBObjectBuilder();
+		group.push("$group");
+		group.push("_id");
+		group.add("size", "$sizes");
+		group.add("color", "$colors");
+		group.pop();
+		group.push("count");
+		group.add("$sum", 1);
+		group.pop();
+		group.pop();
+		
+	
+		
+		return col.aggregate(unwindSizes, unwindColors, group.get() ).results().iterator();
+	}
 }

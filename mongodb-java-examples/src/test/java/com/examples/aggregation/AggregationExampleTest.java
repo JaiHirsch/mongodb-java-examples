@@ -228,6 +228,7 @@ public class AggregationExampleTest {
 	
 	@Test
 	public void sortTest() {
+		// this test assumes that you have imported the zips.jason file provided in the M101J course from 10Gen, week 5 homework
 		DBCollection zipsCollection = client.getDB("states").getCollection("zips");
 		agg.setCollection(zipsCollection);
 		Iterator<DBObject> iter = agg.sort();
@@ -238,6 +239,7 @@ public class AggregationExampleTest {
 	
 	@Test
 	public void limitAndSkipTest() {
+		// this test assumes that you have imported the zips.jason file provided in the M101J course from 10Gen, week 5 homework
 		DBCollection zipsCollection = client.getDB("states").getCollection("zips");
 		agg.setCollection(zipsCollection);
 		Iterator<DBObject> iter = agg.limitAndSkip();
@@ -246,6 +248,32 @@ public class AggregationExampleTest {
 		}
 	}
 
+	@Test
+	public void unwindTest() {
+		// this test assumes that you have imported the blog data from the M101J course from 10Gen
+		DBCollection postsCollection = client.getDB("blog").getCollection("posts");
+		agg.setCollection(postsCollection);
+		Iterator<DBObject> iter = agg.unwind();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+	}
+	
+	@Test
+	public void doubleUnwindTest() {
+		DBCollection inventoryCollection = db.getCollection("inventory");
+		agg.setCollection(inventoryCollection);
+		inventoryCollection.insert(new BasicDBObject("name","Polo Shirt").append("sizes",new String[] {"Small", "Medium","Large"}).append("colors", new String[] {"navy","white","oragne","red"}));
+		inventoryCollection.insert(new BasicDBObject("name","T-Shirt").append("sizes",new String[] {"Small", "Medium","Large", "X-Large"}).append("colors", new String[] {"navy","black","oragne","red"}));
+		inventoryCollection.insert(new BasicDBObject("name","Chino Pants").append("sizes",new String[] {"32x32", "31x30","36x32"}).append("colors", new String[] {"navy","white","oragne","violet"}));
+		Iterator<DBObject> iter = agg.doubleUnwind();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+		inventoryCollection.drop();
+	}
+	
+	
 	private List<Double> generateRandomDoubleValues() {
 		List<Double> prices = new ArrayList<Double>();
 		for(int i = 0; i<5; i++) {
