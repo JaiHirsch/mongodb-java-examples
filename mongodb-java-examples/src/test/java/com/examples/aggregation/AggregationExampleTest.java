@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,15 +46,8 @@ public class AggregationExampleTest {
 
 
 	@Test
-	public void test() throws UnknownHostException {
-		MongoClient client = new MongoClient("localhost:27017");
-		DB db = client.getDB("agg");
-		DBCollection collection = db.getCollection("products");
-		List<String> vals = new ArrayList<String>();
-		vals.add(RandomStringUtils.randomAlphanumeric(5));
-		vals.add(RandomStringUtils.randomAlphanumeric(5));
-		vals.add(RandomStringUtils.randomAlphanumeric(5));
-		vals.add(RandomStringUtils.randomAlphanumeric(5));
+	public void simpleAggregation() throws UnknownHostException {
+		List<String> vals = generateRandomAlphaNumericValues();
 
 		for (int i = 0; i < 100; i++) {
 			if (i < 50)
@@ -68,7 +62,88 @@ public class AggregationExampleTest {
 			System.out.println(iter.next());
 		}
 		collection.drop();
-		client.close();
+	}
+	
+	@Test
+	public void compoundGrouping() {
+		List<String> manufacturers = generateRandomAlphaNumericValues();
+		List<String> categories = generateRandomAlphaNumericValues();
+		
+		for (int i = 0; i < 100; i++) {
+			if (i < 50)
+				collection.insert(new BasicDBObject("manufacturer", manufacturers.get(0)).append("category", categories.get(RandomUtils.nextInt(categories.size()))));
+			else if(i < 75 ) collection.insert(new BasicDBObject("manufacturer", manufacturers.get(1)).append("category", categories.get(RandomUtils.nextInt(categories.size()))));
+			else if(i < 95 ) collection.insert(new BasicDBObject("manufacturer", manufacturers.get(2)).append("category", categories.get(RandomUtils.nextInt(categories.size()))));
+			else collection.insert(new BasicDBObject("manufacturer", manufacturers.get(3)).append("category", categories.get(RandomUtils.nextInt(categories.size()))));
+		}
+		
+		Iterator<DBObject> iter = agg.compoundAggregation();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+		collection.drop();
+	}
+	
+	@Test
+	public void usingSumTest() {
+		List<String> manufacturers = generateRandomAlphaNumericValues();
+		List<Double> prices = generateRandomDoubleValues();
+		
+		for (int i = 0; i < 100; i++) {
+			if (i < 50)
+				collection.insert(new BasicDBObject("manufacturer", manufacturers.get(0)).append("price", prices.get(RandomUtils.nextInt(prices.size()))));
+			else if(i < 75 ) collection.insert(new BasicDBObject("manufacturer", manufacturers.get(1)).append("price", prices.get(RandomUtils.nextInt(prices.size()))));
+			else if(i < 95 ) collection.insert(new BasicDBObject("manufacturer", manufacturers.get(2)).append("price", prices.get(RandomUtils.nextInt(prices.size()))));
+			else collection.insert(new BasicDBObject("manufacturer", manufacturers.get(3)).append("price", prices.get(RandomUtils.nextInt(prices.size()))));
+		}
+		
+		Iterator<DBObject> iter = agg.sumPrices();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+		collection.drop();
+		
+	}
+	
+	@Test
+	public void usingAvgTest() {
+		List<String> categories = generateRandomAlphaNumericValues();
+		List<Double> prices = generateRandomDoubleValues();
+		
+		for (int i = 0; i < 100; i++) {
+			if (i < 50)
+				collection.insert(new BasicDBObject("category", categories.get(0)).append("price", prices.get(RandomUtils.nextInt(prices.size()))));
+			else if(i < 75 ) collection.insert(new BasicDBObject("category", categories.get(1)).append("price", prices.get(RandomUtils.nextInt(prices.size()))));
+			else if(i < 95 ) collection.insert(new BasicDBObject("category", categories.get(2)).append("price", prices.get(RandomUtils.nextInt(prices.size()))));
+			else collection.insert(new BasicDBObject("category", categories.get(3)).append("price", prices.get(RandomUtils.nextInt(prices.size()))));
+		}
+		
+		Iterator<DBObject> iter = agg.averagePrices();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+		collection.drop();
+		
+	}
+
+
+	private List<Double> generateRandomDoubleValues() {
+		List<Double> prices = new ArrayList<Double>();
+		for(int i = 0; i<5; i++) {
+			Double d = Double.valueOf(String.format("%.2f", (RandomUtils.nextDouble() * RandomUtils.nextInt(500))));
+			prices.add(d);
+			
+		}
+		return prices;
+	}
+
+	private List<String> generateRandomAlphaNumericValues() {
+		List<String> vals = new ArrayList<String>();
+		vals.add(RandomStringUtils.randomAlphanumeric(5));
+		vals.add(RandomStringUtils.randomAlphanumeric(5));
+		vals.add(RandomStringUtils.randomAlphanumeric(5));
+		vals.add(RandomStringUtils.randomAlphanumeric(5));
+		return vals;
 	}
 	
 	

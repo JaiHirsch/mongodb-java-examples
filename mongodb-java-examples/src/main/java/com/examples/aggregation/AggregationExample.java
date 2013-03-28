@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * version 3 of the License.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,14 +21,11 @@
 
 package com.examples.aggregation;
 
-import java.net.UnknownHostException;
 import java.util.Iterator;
 
 import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 
 public class AggregationExample {
 	private DBCollection	col;
@@ -37,7 +34,7 @@ public class AggregationExample {
 		this.col = col;
 	}
 
-	public Iterator<DBObject> simpleAggregation() throws UnknownHostException {
+	public Iterator<DBObject> simpleAggregation() {
 
 		BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
 		builder.push("$group");
@@ -49,5 +46,46 @@ public class AggregationExample {
 
 		return col.aggregate(builder.get()).results().iterator();
 	}
+	
+	public Iterator<DBObject> compoundAggregation() {
+		BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
+		builder.push("$group");
+		builder.push("_id");
+		builder.add("manufacturer","$manufacturer");
+		builder.add("category","$category");
+		builder.pop();
+		builder.push("num_products");
+		builder.add("$sum", 1);
+		builder.pop();
+		builder.pop();
+
+		return col.aggregate(builder.get()).results().iterator();
+	}
+
+	public Iterator<DBObject> sumPrices() {
+		BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
+		builder.push("$group");
+		builder.add("_id", "$manufacturer");
+		builder.push("sum_prices");
+		builder.add("$sum", "$price");
+		builder.pop();
+		builder.pop();
+
+		return col.aggregate(builder.get()).results().iterator();
+	}
+
+	public Iterator<DBObject> averagePrices() {
+		BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
+		builder.push("$group");
+		builder.add("_id", "$category");
+		builder.push("sum_prices");
+		builder.add("$avg", "$price");
+		builder.pop();
+		builder.pop();
+
+		return col.aggregate(builder.get()).results().iterator();
+	}
+	
+	
 
 }
