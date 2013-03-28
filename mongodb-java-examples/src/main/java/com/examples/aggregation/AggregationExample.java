@@ -129,7 +129,7 @@ public class AggregationExample {
 		return col.aggregate(builder.get()).results().iterator();
 
 	}
-	
+
 	public Iterator<DBObject> doubleGroupStages() {
 		BasicDBObjectBuilder group_1 = new BasicDBObjectBuilder();
 		group_1.push("$group");
@@ -141,15 +141,38 @@ public class AggregationExample {
 		group_1.add("$avg", "$score");
 		group_1.pop();
 		group_1.pop();
-		
+
 		BasicDBObjectBuilder group_2 = new BasicDBObjectBuilder();
 		group_2.push("$group");
-		group_2.add("_id","$_id.class_id");
+		group_2.add("_id", "$_id.class_id");
 		group_2.push("average");
 		group_2.add("$avg", "$average");
 		group_2.pop();
 		group_2.pop();
 		return col.aggregate(group_1.get(), group_2.get()).results().iterator();
+
+	}
+
+	public Iterator<DBObject> project() {
+		BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
+		builder.push("$project");
+		builder.add("_id", 0);
+		
+		builder.push("maker");
+		builder.add("$toLower", "$manufacturer");
+		builder.pop();
+		
+		builder.push("details");
+		builder.add("category", "$category");
+		builder.push("price");
+		builder.add("$multiply", new Object[] { "$price", 10 });
+		builder.pop();
+		builder.pop();
+		
+		builder.add("item", "$name");
+		builder.pop();
+
+		return col.aggregate(builder.get()).results().iterator();
 
 	}
 

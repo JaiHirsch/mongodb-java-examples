@@ -203,6 +203,15 @@ public class AggregationExampleTest {
 			System.out.println(iter.next());
 		}
 		grades.drop();
+	}
+	
+	@Test
+	public void projectTest() {
+		collection.insert(new BasicDBObject("manufacturer", "Apple").append("price", 2000.01).append("category", "Lap Top").append("name", "MacBookAir"));
+		Iterator<DBObject> iter = agg.project();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
 		collection.drop();
 	}
 
