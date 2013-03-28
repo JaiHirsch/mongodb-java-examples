@@ -22,6 +22,7 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 public class AggregationExampleTest {
+	private static final String	MONGO_CONNECTION_STRING	= "localhost:27017";
 	private static AggregationExample	agg;
 	private static MongoClient	client;
 	private static DBCollection	collection;
@@ -30,7 +31,7 @@ public class AggregationExampleTest {
 	@BeforeClass
 	public static void setUpMongo() {
 		try {
-			client = new MongoClient("localhost:27017");
+			client = new MongoClient(MONGO_CONNECTION_STRING);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
@@ -273,7 +274,6 @@ public class AggregationExampleTest {
 		inventoryCollection.drop();
 	}
 	
-	
 	private List<Double> generateRandomDoubleValues() {
 		List<Double> prices = new ArrayList<Double>();
 		for(int i = 0; i<5; i++) {
@@ -292,7 +292,5 @@ public class AggregationExampleTest {
 		vals.add(RandomStringUtils.randomAlphanumeric(5));
 		return vals;
 	}
-	
-	
 
 }

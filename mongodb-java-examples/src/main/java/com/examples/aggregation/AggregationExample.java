@@ -36,7 +36,6 @@ public class AggregationExample {
 	}
 
 	public Iterator<DBObject> simpleAggregation() {
-
 		BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
 		builder.push("$group");
 		builder.add("_id", "$manufacturer");
@@ -113,7 +112,6 @@ public class AggregationExample {
 		builder.pop();
 
 		return col.aggregate(builder.get()).results().iterator();
-
 	}
 
 	public Iterator<DBObject> maxPrice() {
@@ -128,7 +126,6 @@ public class AggregationExample {
 		builder.pop();
 
 		return col.aggregate(builder.get()).results().iterator();
-
 	}
 
 	public Iterator<DBObject> doubleGroupStages() {
@@ -150,31 +147,27 @@ public class AggregationExample {
 		group_2.add("$avg", "$average");
 		group_2.pop();
 		group_2.pop();
+		
 		return col.aggregate(group_1.get(), group_2.get()).results().iterator();
-
 	}
 
 	public Iterator<DBObject> project() {
 		BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
 		builder.push("$project");
 		builder.add("_id", 0);
-
 		builder.push("maker");
 		builder.add("$toLower", "$manufacturer");
 		builder.pop();
-
 		builder.push("details");
 		builder.add("category", "$category");
 		builder.push("price");
 		builder.add("$multiply", new Object[] { "$price", 10 });
 		builder.pop();
 		builder.pop();
-
 		builder.add("item", "$name");
 		builder.pop();
 
 		return col.aggregate(builder.get()).results().iterator();
-
 	}
 
 	public Iterator<DBObject> match() {
@@ -189,8 +182,8 @@ public class AggregationExample {
 		group.add("$addToSet", "$_id");
 		group.pop();
 		group.pop();
+		
 		return col.aggregate(match.get(), group.get()).results().iterator();
-
 	}
 
 	public Iterator<DBObject> sort() {
@@ -217,7 +210,6 @@ public class AggregationExample {
 		sort.pop();
 
 		return col.aggregate(match.get(), group.get(), project.get(), sort.get()).results().iterator();
-
 	}
 
 	public Iterator<DBObject> limitAndSkip() {
@@ -242,10 +234,10 @@ public class AggregationExample {
 		sort.push("$sort");
 		sort.add("population", -1);
 		sort.pop();
-		
-		BasicDBObject skip = new BasicDBObject("$skip",10);
-		BasicDBObject limit = new BasicDBObject("$limit",5);
-		
+
+		BasicDBObject skip = new BasicDBObject("$skip", 10);
+		BasicDBObject limit = new BasicDBObject("$limit", 5);
+
 		return col.aggregate(match.get(), group.get(), project.get(), sort.get(), skip, limit).results().iterator();
 	}
 
@@ -256,11 +248,10 @@ public class AggregationExample {
 		match.pop();
 		return match;
 	}
-	
+
 	public Iterator<DBObject> unwind() {
-		
-		BasicDBObject unwind = new BasicDBObject("$unwind","$tags");
-		
+		BasicDBObject unwind = new BasicDBObject("$unwind", "$tags");
+
 		BasicDBObjectBuilder group = new BasicDBObjectBuilder();
 		group.push("$group");
 		group.add("_id", "$tags");
@@ -268,29 +259,28 @@ public class AggregationExample {
 		group.add("$sum", 1);
 		group.pop();
 		group.pop();
-		
+
 		BasicDBObjectBuilder sort = new BasicDBObjectBuilder();
 		sort.push("$sort");
 		sort.add("count", -1);
 		sort.pop();
-		
+
 		BasicDBObject limit = new BasicDBObject("$limit", 10);
-		
+
 		BasicDBObjectBuilder project = new BasicDBObjectBuilder();
 		project.push("$project");
 		project.add("_id", 0);
 		project.add("tag", "$_id");
 		project.add("count", 1);
-		
-		
-		return col.aggregate(unwind, group.get(), sort.get(), limit, project.get() ).results().iterator();
+
+		return col.aggregate(unwind, group.get(), sort.get(), limit, project.get()).results().iterator();
 	}
-	
-public Iterator<DBObject> doubleUnwind() {
-		
-		BasicDBObject unwindSizes = new BasicDBObject("$unwind","$sizes");
-		BasicDBObject unwindColors = new BasicDBObject("$unwind","$colors");
-		
+
+	public Iterator<DBObject> doubleUnwind() {
+
+		BasicDBObject unwindSizes = new BasicDBObject("$unwind", "$sizes");
+		BasicDBObject unwindColors = new BasicDBObject("$unwind", "$colors");
+
 		BasicDBObjectBuilder group = new BasicDBObjectBuilder();
 		group.push("$group");
 		group.push("_id");
@@ -301,9 +291,7 @@ public Iterator<DBObject> doubleUnwind() {
 		group.add("$sum", 1);
 		group.pop();
 		group.pop();
-		
-	
-		
-		return col.aggregate(unwindSizes, unwindColors, group.get() ).results().iterator();
+
+		return col.aggregate(unwindSizes, unwindColors, group.get()).results().iterator();
 	}
 }
