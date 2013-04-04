@@ -1,5 +1,4 @@
 
-
 ECHO  Andrew Erlichson - Original .sh file
 ECHO  Jai Hirsch - .bat file translation
 ECHO  10gen
@@ -7,7 +6,7 @@ ECHO  script to start a sharded environment on localhost
 
 ECHO  clean everything up
 
-echo "ECHOoving data files"
+echo "Cleaning old data files"
 del /Q c:\data\config
 del /Q c:\data\shard0
 del /Q c:\data\shard1
